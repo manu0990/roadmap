@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Driver {
+  id           String    @id @default(uuid())
+  name         String
+  phoneNumber  String    @unique
+  email        String?   @unique
+  passwordHash String
+  vehiclePlate String
+  reports      Report[]
+  rides        Ride[]
+}
+
+model Rider {
+  id           String    @id @default(uuid())
+  name         String
+  phoneNumber  String    @unique
+  email        String?   @unique
+  passwordHash String
+  rides        Ride[]
+}
+
+model Ride {
+  id            String    @id @default(uuid())
+  rider     Rider @relation(fields: [riderId], references: [id])
+  riderId   String
+  driver        Driver?   @relation(fields: [driverId], references: [id])
+  driverId      String?
+  startLocation String
+  endLocation   String
+  requestedAt   DateTime  @default(now())
+  acceptedAt    DateTime?
+  completedAt   DateTime?
+  status        RideStatus @default(PENDING)
+}
+
+model Report {
+  id           String    @id @default(uuid())
+  driver       Driver    @relation(fields: [driverId], references: [id])
+  driverId     String
+  latitude     Float
+  longitude    Float
+  type         HazardType
+  severity     Severity
+  description  String?
+  createdAt    DateTime  @default(now())
+}
+
+enum RideStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum HazardType {
+  POTHOLE
+  SPEED_BUMP
+  ROAD_PATCH
+  CONSTRUCTION
+  ACCIDENT
+  FLOODING
+  OTHER
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
