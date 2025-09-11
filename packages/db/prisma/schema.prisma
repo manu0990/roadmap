@@ -11,7 +11,7 @@ model Driver {
   id           String    @id @default(uuid())
   name         String
   phoneNumber  String    @unique
-  email        String?   @unique
+  email        String   @unique
   passwordHash String
   vehiclePlate String
   reports      Report[]
@@ -22,7 +22,7 @@ model Rider {
   id           String    @id @default(uuid())
   name         String
   phoneNumber  String    @unique
-  email        String?   @unique
+  email        String   @unique
   passwordHash String
   rides        Ride[]
 }
