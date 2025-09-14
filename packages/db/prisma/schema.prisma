@@ -51,6 +51,8 @@ model Report {
   severity     Severity
   description  String?
   createdAt    DateTime  @default(now())
+
+  @@index([latitude, longitude])
 }
 
 enum RideStatus {
