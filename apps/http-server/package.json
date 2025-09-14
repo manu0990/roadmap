@@ -1,0 +1,36 @@
+{
+  "name": "http-server",
+  "version": "1.0.0",
+  "description": "HTTP backend server",
+  "main": "./dist/index.js",
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc -p tsconfig.json",
+    "dev": "tsc && tsc-alias -p tsconfig.json --resolve-full-paths && nodemon dist",
+    "build": "tsc && tsc-alias -p tsconfig.json --resolve-full-paths",
+    "clean": "rm -rf dist/ .turbo/ .logs/",
+    "start": "node dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --quiet"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@repo/db": "workspace:*",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.0.0",
+    "nodemon": "^3.1.10",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.0.0"
+  }
+}
