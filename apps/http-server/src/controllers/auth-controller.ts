@@ -6,45 +6,31 @@ import jwt from "jsonwebtoken";
 
 export const signupController = async (req: Request, res: Response) => {
   try {
-    // validate input with Zod schema
     const parsedData = signupSchema.safeParse(req.body);
     if (!parsedData.success) {
       return res.status(422).json({
         message: "Invalid input data",
-        error: parsedData.error,
+        error: parsedData.error.format(),
       });
-    };
+    }
 
-    const { name, email, phoneNumber, userType, password, vehiclePlate } = parsedData.data;
+    const { name, email, phoneNumber, password } = parsedData.data;
 
-    // check if user exists (Driver or Rider)
-    const existingDriver = await prisma.driver.findFirst({ where: { OR: [{ email }, { phoneNumber }] } });
-    const existingRider = await prisma.rider.findFirst({ where: { OR: [{ email }, { phoneNumber }] } });
+    // check if user already exists
+    const existingUser = await prisma.user.findFirst({ where: { OR: [{ email }, { phoneNumber }] } });
 
-    if (existingDriver || existingRider) {
+    if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // creating new user
-    let newUser;
-    if (userType === "driver") {
-      if (!vehiclePlate) {
-        return res.status(400).json({ message: "Vehicle plate is required" });
-      }
-      newUser = await prisma.driver.create({
-        data: { name, email, phoneNumber, vehiclePlate, passwordHash: hashedPassword },
-      });
-    } else {
-      newUser = await prisma.rider.create({
-        data: { name, email, phoneNumber, passwordHash: hashedPassword },
-      });
-    };
+    // create new user
+    const newUser = await prisma.user.create({ data: { name, email, phoneNumber, passwordHash: hashedPassword } });
 
     const token = jwt.sign(
-      { id: newUser.id, email: newUser.email, userType },
-      process.env.JWT_SECRET || 'secr3t',
+      { id: newUser.id, email: newUser.email },
+      process.env.JWT_SECRET || "secr3t",
       { expiresIn: "7d" }
     );
 
@@ -58,13 +44,7 @@ export const signupController = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "User created successfully",
       token,
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        phoneNumber: newUser.phoneNumber,
-        userType,
-      },
+      user: { id: newUser.id },
     });
   } catch (err: any) {
     console.error("Signup error: ", err);
@@ -77,7 +57,6 @@ export const signupController = async (req: Request, res: Response) => {
 
 export const signinController = async (req: Request, res: Response) => {
   try {
-    // validate input with Zod schema
     const parsedData = signinSchema.safeParse(req.body);
     if (!parsedData.success) {
       return res.status(422).json({
@@ -86,34 +65,27 @@ export const signinController = async (req: Request, res: Response) => {
       });
     }
 
-    const { email, phoneNumber, password, userType } = parsedData.data;
+    const { email, phoneNumber, password } = parsedData.data;
 
-    // find user based on userType
-    let user;
-    if (userType === "driver") {
-      user = await prisma.driver.findFirst({ where: { OR: [{ email }, { phoneNumber }] } });
-    } else {
-      user = await prisma.rider.findFirst({ where: { OR: [{ email }, { phoneNumber }] } });
-    }
+    // find user
+    const user = await prisma.user.findFirst({ where: { OR: [{ email }, { phoneNumber }] } });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // compare password
+    // check password
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // sign JWT
     const token = jwt.sign(
-      { id: user.id, email: user.email, userType },
+      { id: user.id, email: user.email },
       process.env.JWT_SECRET || "secr3t",
       { expiresIn: "7d" }
     );
 
-    // set auth cookie
     res.cookie("auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -124,13 +96,7 @@ export const signinController = async (req: Request, res: Response) => {
     return res.json({
       message: "Signin successful",
       token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        userType,
-      },
+      user: { id: user.id }
     });
   } catch (err: any) {
     console.error("Signin error: ", err);

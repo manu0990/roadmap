@@ -7,74 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Driver {
-  id           String    @id @default(uuid())
+model User {
+  id           String         @id @default(uuid())
   name         String
-  phoneNumber  String    @unique
-  email        String   @unique
+  phoneNumber  String         @unique
+  email        String         @unique
   passwordHash String
-  vehiclePlate String
   reports      Report[]
-  rides        Ride[]
-}
-
-model Rider {
-  id           String    @id @default(uuid())
-  name         String
-  phoneNumber  String    @unique
-  email        String   @unique
-  passwordHash String
-  rides        Ride[]
-}
-
-model Ride {
-  id            String    @id @default(uuid())
-  rider     Rider @relation(fields: [riderId], references: [id])
-  riderId   String
-  driver        Driver?   @relation(fields: [driverId], references: [id])
-  driverId      String?
-  startLocation String
-  endLocation   String
-  requestedAt   DateTime  @default(now())
-  acceptedAt    DateTime?
-  completedAt   DateTime?
-  status        RideStatus @default(PENDING)
+  confirmations Confirmation[]
 }
 
 model Report {
-  id           String    @id @default(uuid())
-  driver       Driver    @relation(fields: [driverId], references: [id])
-  driverId     String
-  latitude     Float
-  longitude    Float
-  type         HazardType
-  severity     Severity
-  description  String?
-  createdAt    DateTime  @default(now())
+  id            String         @id @default(uuid())
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String
+  latitude      Float
+  longitude     Float
+  type          HazardType
+  description   String?
+  createdAt     DateTime       @default(now())
+  confirmations Confirmation[]
 
   @@index([latitude, longitude])
 }
 
-enum RideStatus {
-  PENDING
-  ACTIVE
-  COMPLETED
-  CANCELLED
+model Confirmation {
+  id        String   @id @default(uuid())
+  report    Report   @relation(fields: [reportId], references: [id])
+  reportId  String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  isTrue    Boolean
+  createdAt DateTime @default(now())
+
+  @@unique([reportId, userId])
 }
 
 enum HazardType {
   POTHOLE
   SPEED_BUMP
   ROAD_PATCH
-  CONSTRUCTION
-  ACCIDENT
-  FLOODING
-  OTHER
-}
-
-enum Severity {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
 }
