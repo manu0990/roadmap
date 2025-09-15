@@ -10,7 +10,7 @@
     "build": "tsc && tsc-alias -p tsconfig.json --resolve-full-paths",
     "clean": "rm -rf dist/ .turbo/ .logs/",
     "start": "node dist",
-    "typecheck": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
     "lint": "eslint . --quiet"
   },
   "keywords": [],
@@ -30,6 +30,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.0.0",
     "nodemon": "^3.1.10",
+    "prisma": "^6.16.1",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.0.0"
   }
