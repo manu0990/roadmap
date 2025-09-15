@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
-  name         String
-  phoneNumber  String         @unique
-  email        String         @unique
-  passwordHash String
-  reports      Report[]
+  id            String         @id @default(uuid())
+  name          String
+  phoneNumber   String         @unique
+  email         String         @unique
+  passwordHash  String
+  reports       Report[]
   confirmations Confirmation[]
 }
 
@@ -25,6 +25,7 @@ model Report {
   longitude     Float
   type          HazardType
   description   String?
+  confidence    Float          @default(1.0)
   createdAt     DateTime       @default(now())
   confirmations Confirmation[]
 
