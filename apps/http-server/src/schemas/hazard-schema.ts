@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-const HazardType = [
+export const HazardType = [
   "POTHOLE",
-  "SPEED_BUMP",
+  "SINGLE_SPEED_BUMP",
+  "MULTIPLE_SPEED_BUMP",
   "ROAD_PATCH"
 ] as const;
 
