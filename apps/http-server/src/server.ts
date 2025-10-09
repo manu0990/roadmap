@@ -13,7 +13,7 @@ app.use("/auth", authRouter);
 app.use("/ride", rideRouter);
 app.use("/hazards", hazardRouter);
 
-app.get("/health", authMiddleware, (req: Request, res: Response) => {
+app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({
     message: "Server health is ok.",
     environment: process.env.NODE_ENV || "unknown",
