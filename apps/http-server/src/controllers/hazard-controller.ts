@@ -128,7 +128,7 @@ export const confirmHazard = async (req: AuthenticatedRequest, res: Response) =>
     // Recalculate confidence score
     const allConfirmations = await prisma.confirmation.findMany({ where: { reportId: hazardId } });
     const totalConfirmations = allConfirmations.length;
-    const positiveConfirmations = allConfirmations.filter(c => c.isTrue).length;
+    const positiveConfirmations = allConfirmations.filter((c: { isTrue: boolean }) => c.isTrue).length;
 
     // for now calculation medium to define the confidence
     let newConfidence = totalConfirmations > 0 ? positiveConfirmations / totalConfirmations : 0.5;
@@ -146,6 +146,27 @@ export const confirmHazard = async (req: AuthenticatedRequest, res: Response) =>
 
   } catch (error) {
     console.error("Error confirming hazard:", error);
+    return res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};
+
+export const getAllHazards = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const hazards = await prisma.report.findMany();
+
+    const formattedHazards = hazards.map((hazard: { id: string; type: string; latitude: number; longitude: number }) => ({
+      hazardId: hazard.id,
+      hazardType: hazard.type,
+      latitude: hazard.latitude,
+      longitude: hazard.longitude
+    }));
+
+    return res.status(200).json(formattedHazards);
+
+  } catch (error) {
+    console.error("Error fetching hazards:", error);
     return res.status(500).json({
       message: "Internal server error"
     });
